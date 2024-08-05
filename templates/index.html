@@ -8,24 +8,100 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>Penguin Prediction API</h1>
-            <p>Welcome to the Penguin Prediction API. Use the endpoints to predict penguin species or retrain the model.</p>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <a class="navbar-brand" href="#">Penguin API</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item active">
+                    <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Predict</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Retrain</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div class="container mt-4">
+        <div class="jumbotron text-center">
+            <h1 class="display-4">Penguin Prediction API</h1>
+            <p class="lead">Welcome to the Penguin Prediction API. Use the endpoints to predict penguin species or retrain the model.</p>
         </div>
         <div class="row">
             <div class="col-md-6">
-                <h2>Predict</h2>
-                <p>Send a GET request to <code>/api/v1/predict</code> with the following parameters:</p>
-                <pre>
-island=0&bill_length_mm=50.0&bill_depth_mm=15.0&flipper_length_mm=220&body_mass_g=5000&sex=1
-                </pre>
+                <h2>Predict Penguin Species</h2>
+                <form id="predict-form">
+                    <div class="form-group">
+                        <label for="island">Island</label>
+                        <input type="number" class="form-control" id="island" name="island" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="bill_length_mm">Bill Length (mm)</label>
+                        <input type="number" class="form-control" id="bill_length_mm" name="bill_length_mm" step="0.1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="bill_depth_mm">Bill Depth (mm)</label>
+                        <input type="number" class="form-control" id="bill_depth_mm" name="bill_depth_mm" step="0.1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="flipper_length_mm">Flipper Length (mm)</label>
+                        <input type="number" class="form-control" id="flipper_length_mm" name="flipper_length_mm" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="body_mass_g">Body Mass (g)</label>
+                        <input type="number" class="form-control" id="body_mass_g" name="body_mass_g" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sex">Sex</label>
+                        <select class="form-control" id="sex" name="sex">
+                            <option value="0">Male</option>
+                            <option value="1">Female</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Predict</button>
+                </form>
+                <div id="result" class="mt-4"></div>
             </div>
             <div class="col-md-6">
-                <h2>Retrain</h2>
+                <h2>Retrain Model</h2>
                 <p>Send a GET request to <code>/api/v1/retrain</code> to retrain the model using the available dataset.</p>
             </div>
         </div>
     </div>
+    <footer class="bg-dark text-white text-center py-3">
+        <p>&copy; 2024 Penguin Prediction API. All rights reserved.</p>
+    </footer>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+    document.getElementById('predict-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        
+        const formData = new FormData(this);
+        const queryParams = new URLSearchParams(formData).toString();
+        
+        fetch(`/api/v1/predict?${queryParams}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('result').innerHTML = `
+                    <h3>Prediction Result</h3>
+                    <p><strong>Species:</strong> ${data.predictions}</p>
+                `;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('result').innerHTML = `
+                    <h3>Error</h3>
+                    <p>There was an error processing your request.</p>
+                `;
+            });
+    });
+    </script>
 </body>
 </html>
