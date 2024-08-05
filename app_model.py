@@ -8,7 +8,7 @@ from sklearn.preprocessing import StandardScaler
 app = Flask(__name__)
 app.config['DEBUG'] = True
 
-path_base = "/home/AlbaMRM/PythonAnywhere_TC"
+path_base = '/home/AlbaMRM/PythonAnywhere_TC'
 
 @app.route('/')
 def index():
@@ -22,7 +22,7 @@ def predict_page():
 def retrain_page():
     return render_template('retrain.html')
 
-@app.route('/api/v1/predict', methods=['GET'])
+@app.route('/api/v1/predict', methods = ['GET'])
 def predict():
     try:
         model_path = os.path.join(path_base, '/ad_model.pkl')
@@ -38,7 +38,7 @@ def predict():
 
         if (bill_length_mm is None or bill_depth_mm is None or flipper_length_mm is None or 
                 body_mass_g is None or sex is None or island is None):
-            return "Args empty, the data are not enough to predict", 400
+            return 'Args empty, the data are not enough to predict', 400
 
         bill_length_mm = float(bill_length_mm)
         bill_depth_mm = float(bill_depth_mm)
@@ -55,27 +55,27 @@ def predict():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/v1/retrain', methods=['GET'])
+@app.route('/api/v1/retrain', methods = ['GET'])
 def retrain():
-    if os.path.exists(path_base + "/data/penguins.csv"):
+    if os.path.exists(path_base + '/data/penguins.csv'):
         data = pd.read_csv(path_base + '/data/penguins.csv')
         
-        X = data.drop(columns='species')
+        X = data.drop(columns = 'species')
         y = data['species']
         
         scaler = StandardScaler()
         X_scaled = scaler.fit_transform(X)
         
-        X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
-        model = pickle.load(open(path_base + '/ad_model.pkl','rb'))
+        X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size = 0.2, random_state = 42)
+        model = pickle.load(open(path_base + '/ad_model.pkl', 'rb'))
         
         model.fit(X_train, y_train)
         
-        pickle.dump(model, open(path_base + '/ad_model_new.pkl','wb'))
+        pickle.dump(model, open(path_base + '/ad_model_new.pkl', 'wb'))
 
-        return "Model retrained successfully."
+        return 'Model retrained successfully.'
     else:
-        return "<h2>New data for retrain NOT FOUND. Nothing done!</h2>"
+        return '<h2>New data for retrain NOT FOUND. Nothing done!</h2>'
 
 if __name__ == '__main__':
     app.run()
