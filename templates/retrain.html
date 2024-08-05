@@ -10,4 +10,53 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <a class="navbar-brand" href="/">Penguin API</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/predict">Predict</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="/retrain">Retrain <span class="sr-only">(current)</span></a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div class="container mt-4">
+        <h2>Retrain the Model</h2>
+        <p>Click the button below to retrain the model using the latest dataset.</p>
+        <button id="retrain-btn" class="btn btn-primary">Retrain Model</button>
+        <div id="retrain-result" class="mt-4"></div>
+    </div>
+    <footer class="bg-dark text-white text-center py-3">
+        <p>&copy; 2024 Penguin Prediction API. All rights reserved.</p>
+    </footer>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+    document.getElementById('retrain-btn').addEventListener('click', function() {
+        fetch('/api/v1/retrain')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('retrain-result').innerHTML = `
+                    <h3>Retrain Result</h3>
+                    <p>${data}</p>
+                `;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('retrain-result').innerHTML = `
+                    <h3>Error</h3>
+                    <p>There was an error retraining the model.</p>
+                `;
+            });
+    });
+    </script>
+</body>
+</html>
