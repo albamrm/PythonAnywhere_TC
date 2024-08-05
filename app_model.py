@@ -1,26 +1,22 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 import os
 import pickle
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-import numpy as np
 import subprocess
 
-# os.chdir(os.path.dirname(__file__))
-
-path_base = "/home/Juanxetee/sabadosteam"
+path_base = "/home/AlbaMRM/PythonAnywhere_TC"
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
 
 # Enruta la landing page (endpoint /)
 @app.route('/', methods=['GET'])
-def hello():
-    return "Bienvenido a mi API del modelo pingüinos"
+def index():
+    return render_template('index.html')
 
 # Enruta la funcion al endpoint /api/v1/predict
-
 @app.route('/api/v1/predict', methods=['GET'])
 def predict():
     try:
@@ -64,8 +60,7 @@ def predict():
 
 # Endpoint para reentrenar el modelo
 @app.route('/api/v1/retrain', methods=['GET'])
-def retrain(): # Rutarlo al endpoint '/api/v1/retrain/', metodo GET
-    
+def retrain(): 
     if os.path.exists(path_base + "/data/penguins.csv"):
         data = pd.read_csv(path_base + '/data/penguins.csv')
         
@@ -93,8 +88,8 @@ def retrain(): # Rutarlo al endpoint '/api/v1/retrain/', metodo GET
 @app.route('/webhook_2024', methods=['POST'])
 def webhook():
     # Ruta al repositorio donde se realizará el pull
-    path_repo = '/home/sabadosteam/sabadosteam'
-    servidor_web = '/var/www/sabadosteam_pythonanywhere_com_wsgi.py' 
+    path_repo = "/home/AlbaMRM/PythonAnywhere_TC"
+    servidor_web = '/var/www/albamrm_pythonanywhere_com_wsgi.py' 
 
     # Comprueba si la solicitud POST contiene datos JSON
     if request.is_json:
@@ -122,7 +117,6 @@ def webhook():
             return jsonify({'message': 'No se encontró información sobre el repositorio en la carga útil (payload)'}), 400
     else:
         return jsonify({'message': 'La solicitud no contiene datos JSON'}), 400
-
 
 if __name__ == '__main__':
     app.run()

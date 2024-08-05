@@ -5,19 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Penguin Prediction API</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: Arial, sans-serif;
-        }
-        .container {
-            margin-top: 50px;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 50px;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
     <div class="container">
@@ -28,21 +16,14 @@
         <div class="row">
             <div class="col-md-6">
                 <h2>Predict</h2>
-                <p>Send a POST request to <code>/api/v1/predict</code> with the following JSON structure:</p>
+                <p>Send a GET request to <code>/api/v1/predict</code> with the following parameters:</p>
                 <pre>
-{
-    "island": 0,
-    "bill_length_mm": 50.0,
-    "bill_depth_mm": 15.0,
-    "flipper_length_mm": 220,
-    "body_mass_g": 5000,
-    "sex": 1
-}
+island=0&bill_length_mm=50.0&bill_depth_mm=15.0&flipper_length_mm=220&body_mass_g=5000&sex=1
                 </pre>
             </div>
             <div class="col-md-6">
                 <h2>Retrain</h2>
-                <p>Send a POST request to <code>/api/v1/retrain</code> with a dataset to retrain the model. The dataset should include the species.</p>
+                <p>Send a GET request to <code>/api/v1/retrain</code> to retrain the model using the available dataset.</p>
             </div>
         </div>
     </div>
