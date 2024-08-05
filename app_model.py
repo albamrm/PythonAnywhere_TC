@@ -8,7 +8,16 @@ from sklearn.preprocessing import StandardScaler
 app = Flask(__name__)
 app.config['DEBUG'] = True
 
-path_base = "/home/AlbaMRM/PythonAnywhere_TC"
+path_base = os.getenv('PATH_BASE', '/home/AlbaMRM/PythonAnywhere_TC')
+model_path = os.path.join(path_base, 'ad_model.pkl')
+
+# Cargar el modelo una vez al iniciar la aplicación
+model = None
+try:
+    with open(model_path, 'rb') as f:
+        model = pickle.load(f)
+except Exception as e:
+    print(f"Error loading model: {e}")
 
 @app.route('/')
 def index():
@@ -22,44 +31,44 @@ def predict_page():
 def retrain_page():
     return render_template('retrain.html')
 
-@app.route('/api/v1/predict', methods=['GET'])
+@app.route('/api/v1/predict', methods=['POST'])
 def predict():
     try:
-        model_path = os.path.join(path_base, '/ad_model.pkl')
-        with open(model_path, 'rb') as f:
-            model = pickle.load(f)
-
-        bill_length_mm = request.args.get('bill_length_mm', None)
-        bill_depth_mm = request.args.get('bill_depth_mm', None)
-        flipper_length_mm = request.args.get('flipper_length_mm', None)
-        body_mass_g = request.args.get('body_mass_g', None)
-        sex = request.args.get('sex', None)
-        island = request.args.get('island', None)
-
-        if (bill_length_mm is None or bill_depth_mm is None or flipper_length_mm is None or 
-                body_mass_g is None or sex is None or island is None):
-            return "Args empty, the data are not enough to predict", 400
-
-        bill_length_mm = float(bill_length_mm)
-        bill_depth_mm = float(bill_depth_mm)
-        flipper_length_mm = float(flipper_length_mm)
-        body_mass_g = float(body_mass_g)
-        sex = int(sex)
-        island = int(island)
-
-        input_data = pd.DataFrame([[bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g, sex, island]], 
-                                  columns=['bill_length_mm', 'bill_depth_mm', 'flipper_length_mm', 'body_mass_g', 'sex', 'island'])
-        prediction = model.predict(input_data)
+        data = request.json
+        required_fields = ['bill_length_mm', 'bill_depth_mm', 'flipper_length_mm', 'body_mass_g', 'sex', 'island']
+        
+        if not all(field in data for field in required_fields):
+            return jsonify({'error': 'Missing fields in request data'}), 400
+        
+        # Convert input data to float/int as required
+        try:
+            input_data = {
+                'bill_length_mm': float(data['bill_length_mm']),
+                'bill_depth_mm': float(data['bill_depth_mm']),
+                'flipper_length_mm': float(data['flipper_length_mm']),
+                'body_mass_g': float(data['body_mass_g']),
+                'sex': int(data['sex']),
+                'island': int(data['island'])
+            }
+        except ValueError as e:
+            return jsonify({'error': f'Invalid data type: {e}'}), 400
+        
+        input_df = pd.DataFrame([input_data])
+        prediction = model.predict(input_df)
         
         return jsonify({'predictions': prediction[0]})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/v1/retrain', methods=['GET'])
+@app.route('/api/v1/retrain', methods=['POST'])
 def retrain():
-    if os.path.exists(path_base + "/data/penguins.csv"):
-        data = pd.read_csv(path_base + '/data/penguins.csv')
+    try:
+        data_path = os.path.join(path_base, 'data/penguins.csv')
         
+        if not os.path.exists(data_path):
+            return "<h2>New data for retrain NOT FOUND. Nothing done!</h2>", 404
+        
+        data = pd.read_csv(data_path)
         X = data.drop(columns='species')
         y = data['species']
         
@@ -67,15 +76,16 @@ def retrain():
         X_scaled = scaler.fit_transform(X)
         
         X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
-        model = pickle.load(open(path_base + '/ad_model.pkl','rb'))
         
         model.fit(X_train, y_train)
         
-        pickle.dump(model, open(path_base + '/ad_model_new.pkl','wb'))
-
+        new_model_path = os.path.join(path_base, 'ad_model_new.pkl')
+        with open(new_model_path, 'wb') as f:
+            pickle.dump(model, f)
+        
         return "Model retrained successfully."
-    else:
-        return "<h2>New data for retrain NOT FOUND. Nothing done!</h2>"
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run()
