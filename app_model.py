@@ -4,9 +4,6 @@ import pickle
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from sklearn.linear_model import Lasso
-from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error
-import numpy as np
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
@@ -62,25 +59,23 @@ def predict():
 def retrain():
     if os.path.exists(path_base + "/data/penguins.csv"):
         data = pd.read_csv(path_base + '/data/penguins.csv')
-
+        
         X = data.drop(columns='species')
         y = data['species']
-
+        
         scaler = StandardScaler()
         X_scaled = scaler.fit_transform(X)
-
+        
         X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
-
-        model = Lasso(alpha=6000)
+        model = pickle.load(open(path_base + '/ad_model.pkl','rb'))
+        
         model.fit(X_train, y_train)
-        rmse = np.sqrt(mean_squared_error(y_test, model.predict(X_test)))
-        mape = mean_absolute_percentage_error(y_test, model.predict(X_test))
-        model.fit(data.drop(columns=['species']), data['species'])
-        pickle.dump(model, open('ad_model.pkl', 'wb'))
+        
+        pickle.dump(model, open(path_base + '/ad_model.pkl','wb'))
 
-        return f"Model retrained. New evaluation metric RMSE: {str(rmse)}, MAPE: {str(mape)}"
+        return "Model retrained successfully."
     else:
-        return f"<h2>New data for retrain NOT FOUND. Nothing done!</h2>"
+        return "<h2>New data for retrain NOT FOUND. Nothing done!</h2>"
 
 if __name__ == '__main__':
     app.run()
