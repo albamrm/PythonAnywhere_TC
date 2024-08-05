@@ -25,7 +25,7 @@ def retrain_page():
 @app.route('/api/v1/predict', methods=['GET'])
 def predict():
     try:
-        model_path = os.path.join(path_base, 'ad_model.pkl')
+        model_path = os.path.join(path_base, '/ad_model.pkl')
         with open(model_path, 'rb') as f:
             model = pickle.load(f)
 
@@ -71,7 +71,7 @@ def retrain():
         
         model.fit(X_train, y_train)
         
-        pickle.dump(model, open(path_base + '/ad_model.pkl','wb'))
+        pickle.dump(model, open(path_base + '/ad_model_new.pkl','wb'))
 
         return "Model retrained successfully."
     else:
