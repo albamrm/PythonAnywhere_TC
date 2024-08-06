@@ -23,23 +23,27 @@ def predict_page():
 def retrain_page():
     return render_template('retrain.html')
 
-# Diccionario para mapear predicciones numéricas a nombres de especies
-species_mapping = {0: 'Adelie', 1: 'Gentoo', 2: 'Chinstrap'}
-island_mapping = {0: 'Torgersen', 1: 'Biscoe', 2: 'Dream'}
-sex_mapping = {0: 'Female', 1: 'Male'}
+# Cargar el modelo
+def load_model():
+    model_path = os.path.join(path_base, 'ad_model.pkl')
+    with open(model_path, 'rb') as f:
+        model = pickle.load(f)
+    return model
+
+# Cargar el mapeo de categorías
+def load_mappings():
+    mappings_path = os.path.join(path_base, 'mappings.pkl')
+    with open(mappings_path, 'rb') as f:
+        mappings = pickle.load(f)
+    return mappings
 
 # Enruta la funcion al endpoint /api/v1/predict
-@app.route('/api/v1/predict', methods=['GET'])
+@app.route('/api/v1/predict', methods = ['GET'])
 def predict():
     try:
-        # Cargar el modelo
-        model_path = os.path.join(path_base, 'ad_model.pkl')
-        if not os.path.exists(model_path):
-            return jsonify({'error': 'Model file not found'}), 500
-        
-        with open(model_path, 'rb') as f:
-            model = pickle.load(f)
-        
+        model = load_model()
+        mappings = load_mappings()
+
         # Obtener los parámetros de la solicitud GET
         bill_length_mm = request.args.get('bill_length_mm', None)
         bill_depth_mm = request.args.get('bill_depth_mm', None)
@@ -52,7 +56,7 @@ def predict():
         if (bill_length_mm is None or bill_depth_mm is None or flipper_length_mm is None or 
                 body_mass_g is None or sex is None or island is None):
             return jsonify({'error': 'Args empty, the data are not enough to predict'}), 400
-        
+
         # Convertir los parámetros a sus tipos adecuados
         try:
             bill_length_mm = float(bill_length_mm)
@@ -66,27 +70,27 @@ def predict():
 
         # Crear un DataFrame con los datos de entrada
         input_data = pd.DataFrame([[bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g, sex, island]], 
-                                  columns=['bill_length_mm', 'bill_depth_mm', 'flipper_length_mm', 'body_mass_g', 'sex', 'island'])
-        
+                                  columns = ['bill_length_mm', 'bill_depth_mm', 'flipper_length_mm', 'body_mass_g', 'sex', 'island'])
+
         # Realizar la predicción
-        prediction = model.predict(input_data)[0]
-        
-        # Convertir la predicción numérica a nombre de especie
-        species = species_mapping.get(prediction, 'Unknown')
-        
+        prediction = model.predict(input_data)
+
+        # Mapear la predicción al nombre de la especie
+        species = mappings['species'][prediction[0]]
+
         # Retornar la predicción en formato JSON
         return jsonify({'predictions': species})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 # Endpoint para reentrenar el modelo
-@app.route('/api/v1/retrain', methods=['GET'])
+@app.route('/api/v1/retrain', methods = ['GET'])
 def retrain():
     if os.path.exists(path_base + '/data/penguins.csv'):
         data = pd.read_csv(path_base + '/data/penguins.csv')
         
         # Separar características y variable objetivo
-        X = data.drop(columns='species')
+        X = data.drop(columns = 'species')
         y = data['species']
         
         # Escalar los datos
@@ -94,20 +98,21 @@ def retrain():
         X_scaled = scaler.fit_transform(X)
         
         # Dividir en entrenamiento y prueba
-        X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
-        model = pickle.load(open(path_base + '/ad_model.pkl', 'rb'))
+        X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size = 0.2, random_state = 42)
+        model = load_model()
         
         # Reentrenar el modelo
         model.fit(X_train, y_train)
         
         # Guardar el modelo reentrenado
-        pickle.dump(model, open(path_base + '/ad_model_new.pkl', 'wb'))
+        with open(path_base + '/ad_model_new.pkl', 'wb') as f:
+            pickle.dump(model, f)
 
         return 'Model retrained successfully.'
     else:
         return '<h2>New data for retrain NOT FOUND. Nothing done!</h2>'
     
-@app.route('/webhook_2024', methods=['POST'])
+@app.route('/webhook_2024', methods = ['POST'])
 def webhook():
     # Ruta al repositorio donde se realizará el pull
     path_repo = '/home/AlbaMRM/sabadosteam'
@@ -130,8 +135,8 @@ def webhook():
 
             # Realiza un git pull en el repositorio
             try:
-                subprocess.run(['git', 'pull', clone_url], check=True)
-                subprocess.run(['touch', servidor_web], check=True)
+                subprocess.run(['git', 'pull', clone_url], check = True)
+                subprocess.run(['touch', servidor_web], check = True)
                 return jsonify({'message': f'Se realizó un git pull en el repositorio {repo_name}'}), 200
             except subprocess.CalledProcessError:
                 return jsonify({'message': f'Error al realizar git pull en el repositorio {repo_name}'}), 500
