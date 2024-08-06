@@ -78,27 +78,22 @@
         const formData = new FormData(this);
         const queryParams = new URLSearchParams(formData).toString();
 
-        console.log("Form data:", queryParams);
-        
         fetch(`/api/v1/predict?${queryParams}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
-                console.log("Response data:", data);
                 if (data.error) {
-                    throw new Error(data.error);
+                    document.getElementById('result').innerHTML = `
+                        <h3>Error</h3>
+                        <p>${data.error}</p>
+                    `;
+                } else {
+                    document.getElementById('result').innerHTML = `
+                        <h3>Prediction Result</h3>
+                        <p><strong>Species:</strong> ${data.predictions}</p>
+                    `;
                 }
-                document.getElementById('result').innerHTML = `
-                    <h3>Prediction Result</h3>
-                    <p><strong>Species:</strong> ${data.predictions}</p>
-                `;
             })
             .catch(error => {
-                console.error('Error:', error);
                 document.getElementById('result').innerHTML = `
                     <h3>Error</h3>
                     <p>There was an error processing your request: ${error.message}</p>

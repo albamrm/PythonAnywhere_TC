@@ -41,24 +41,15 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
     document.getElementById('retrain-btn').addEventListener('click', function() {
-        console.log('Retrain button clicked'); // Debugging statement
-        
         fetch('/api/v1/retrain')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.text();
-            })
+            .then(response => response.text())
             .then(data => {
-                console.log('Retrain response:', data); // Debugging statement
                 document.getElementById('retrain-result').innerHTML = `
                     <h3>Retrain Result</h3>
                     <p>${data}</p>
                 `;
             })
             .catch(error => {
-                console.error('Error:', error);
                 document.getElementById('retrain-result').innerHTML = `
                     <h3>Error</h3>
                     <p>There was an error retraining the model: ${error.message}</p>

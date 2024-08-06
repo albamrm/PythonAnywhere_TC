@@ -4,6 +4,7 @@ import pickle
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsClassifier
 import subprocess
 
 app = Flask(__name__)
@@ -30,6 +31,13 @@ def load_model():
         model = pickle.load(f)
     return model
 
+# Cargar el escalador
+def load_scaler():
+    scaler_path = os.path.join(path_base, 'scaler.pkl')
+    with open(scaler_path, 'rb') as f:
+        scaler = pickle.load(f)
+    return scaler
+
 # Cargar el mapeo de categorías
 def load_mappings():
     mappings_path = os.path.join(path_base, 'mappings.pkl')
@@ -42,6 +50,7 @@ def load_mappings():
 def predict():
     try:
         model = load_model()
+        scaler = load_scaler()
         mappings = load_mappings()
 
         # Obtener los parámetros de la solicitud GET
@@ -72,11 +81,15 @@ def predict():
         input_data = pd.DataFrame([[bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g, sex, island]], 
                                   columns = ['bill_length_mm', 'bill_depth_mm', 'flipper_length_mm', 'body_mass_g', 'sex', 'island'])
 
+        # Escalar los datos de entrada
+        scaler = load_scaler()
+        input_data_scaled = scaler.transform(input_data)
+
         # Realizar la predicción
-        prediction = model.predict(input_data)
+        prediction = model.predict(input_data_scaled)
 
         # Mapear la predicción al nombre de la especie
-        species = mappings['species'][prediction[0]]
+        species = load_mappings()['species'][prediction[0]]
 
         # Retornar la predicción en formato JSON
         return jsonify({'predictions': species})
@@ -86,8 +99,8 @@ def predict():
 # Endpoint para reentrenar el modelo
 @app.route('/api/v1/retrain', methods = ['GET'])
 def retrain():
-    if os.path.exists(path_base + '/data/penguins.csv'):
-        data = pd.read_csv(path_base + '/data/penguins.csv')
+    if os.path.exists(os.path.join(path_base, 'data', 'penguins.csv')):
+        data = pd.read_csv(os.path.join(path_base, 'data', 'penguins.csv'))
         
         # Separar características y variable objetivo
         X = data.drop(columns = 'species')
@@ -99,14 +112,18 @@ def retrain():
         
         # Dividir en entrenamiento y prueba
         X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size = 0.2, random_state = 42)
-        model = load_model()
+        model = KNeighborsClassifier(n_neighbors = 5)
         
-        # Reentrenar el modelo
+        # Entrenar el modelo
         model.fit(X_train, y_train)
         
         # Guardar el modelo reentrenado
-        with open(path_base + '/ad_model_new.pkl', 'wb') as f:
+        with open(os.path.join(path_base, 'ad_model_new.pkl'), 'wb') as f:
             pickle.dump(model, f)
+        
+        # Guardar el escalador
+        with open(os.path.join(path_base, 'scaler_new.pkl'), 'wb') as f:
+            pickle.dump(scaler, f)
 
         return 'Model retrained successfully.'
     else:
@@ -116,7 +133,7 @@ def retrain():
 def webhook():
     # Ruta al repositorio donde se realizará el pull
     path_repo = '/home/AlbaMRM/sabadosteam'
-    servidor_web = '/var/www/albamrm_pythonanywhere_com_wsgi.py' 
+    servidor_web = '/var/www/albamrm_pythonanywhere_com_wsgi.py'
 
     # Comprueba si la solicitud POST contiene datos JSON
     if request.is_json:
@@ -135,8 +152,8 @@ def webhook():
 
             # Realiza un git pull en el repositorio
             try:
-                subprocess.run(['git', 'pull', clone_url], check = True)
-                subprocess.run(['touch', servidor_web], check = True)
+                subprocess.run(['git', 'pull'], check=True)  # Elimina el clone_url
+                subprocess.run(['touch', servidor_web], check=True)
                 return jsonify({'message': f'Se realizó un git pull en el repositorio {repo_name}'}), 200
             except subprocess.CalledProcessError:
                 return jsonify({'message': f'Error al realizar git pull en el repositorio {repo_name}'}), 500

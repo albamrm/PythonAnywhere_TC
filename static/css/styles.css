@@ -24,6 +24,7 @@ body {
     background-color: #343a40; /* Fondo oscuro para el pie de página */
     color: #ffffff; /* Color del texto del pie de página */
     padding: 15px; /* Espaciado interno del pie de página */
+    margin-top: 20px; /* Espacio antes del pie de página */
 }
 
 img.img-fluid {
@@ -43,4 +44,8 @@ h1, h2, h3 {
 .btn-primary:hover {
     background-color: #0056b3; /* Color de fondo del botón en hover */
     border-color: #004085; /* Color del borde del botón en hover */
+}
+
+.btn-primary:focus, .btn-primary.focus {
+    box-shadow: 0 0 0 0.2rem rgba(38, 143, 255, 0.5); /* Sombra de enfoque para mejorar accesibilidad */
 }
