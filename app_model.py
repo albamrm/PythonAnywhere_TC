@@ -23,6 +23,9 @@ def predict_page():
 def retrain_page():
     return render_template('retrain.html')
 
+# Diccionario para mapear predicciones numéricas a nombres de especies
+species_mapping = {0 : 'Adelie', 1 : 'Gentoo', 2 : 'Chinstrap'}
+
 # Enruta la funcion al endpoint /api/v1/predict
 @app.route('/api/v1/predict', methods = ['GET'])
 def predict():
@@ -63,11 +66,14 @@ def predict():
         input_data = pd.DataFrame([[bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g, sex, island]], 
                                   columns = ['bill_length_mm', 'bill_depth_mm', 'flipper_length_mm', 'body_mass_g', 'sex', 'island'])
         
-        # Realizar la predicción sin escalar los datos
-        prediction = model.predict(input_data)
+        # Realizar la predicción
+        prediction = model.predict(input_data)[0]
+        
+        # Convertir la predicción numérica a nombre de especie
+        species = species_mapping.get(prediction, 'Unknown')
         
         # Retornar la predicción en formato JSON
-        return jsonify({'predictions': prediction[0]})
+        return jsonify({'predictions': species})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -122,8 +128,8 @@ def webhook():
 
             # Realiza un git pull en el repositorio
             try:
-                subprocess.run(['git', 'pull', clone_url], check = True)
-                subprocess.run(['touch', servidor_web], check = True)
+                subprocess.run(['git', 'pull', clone_url], check=True)
+                subprocess.run(['touch', servidor_web], check=True)
                 return jsonify({'message': f'Se realizó un git pull en el repositorio {repo_name}'}), 200
             except subprocess.CalledProcessError:
                 return jsonify({'message': f'Error al realizar git pull en el repositorio {repo_name}'}), 500
