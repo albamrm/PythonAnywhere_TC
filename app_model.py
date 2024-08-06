@@ -28,7 +28,10 @@ def retrain_page():
 def predict():
     try:
         # Cargar el modelo
-        model_path = os.path.join(path_base, '/ad_model.pkl')
+        model_path = os.path.join(path_base, 'ad_model.pkl')
+        if not os.path.exists(model_path):
+            return jsonify({'error': 'Model file not found'}), 500
+        
         with open(model_path, 'rb') as f:
             model = pickle.load(f)
         
@@ -43,15 +46,18 @@ def predict():
         # Verificar que todos los parámetros estén presentes
         if (bill_length_mm is None or bill_depth_mm is None or flipper_length_mm is None or 
                 body_mass_g is None or sex is None or island is None):
-            return 'Args empty, the data are not enough to predict', 400
+            return jsonify({'error': 'Args empty, the data are not enough to predict'}), 400
         
         # Convertir los parámetros a sus tipos adecuados
-        bill_length_mm = float(bill_length_mm)
-        bill_depth_mm = float(bill_depth_mm)
-        flipper_length_mm = float(flipper_length_mm)
-        body_mass_g = float(body_mass_g)
-        sex = int(sex)
-        island = int(island)
+        try:
+            bill_length_mm = float(bill_length_mm)
+            bill_depth_mm = float(bill_depth_mm)
+            flipper_length_mm = float(flipper_length_mm)
+            body_mass_g = float(body_mass_g)
+            sex = int(sex)
+            island = int(island)
+        except ValueError:
+            return jsonify({'error': 'Invalid input types'}), 400
 
         # Crear un DataFrame con los datos de entrada
         input_data = pd.DataFrame([[bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g, sex, island]], 
