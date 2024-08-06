@@ -78,8 +78,8 @@ def predict():
             return jsonify({'error': 'Invalid input types'}), 400
 
         # Crear un DataFrame con los datos de entrada
-        input_data = pd.DataFrame([[bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g, sex, island]], 
-                                  columns = ['bill_length_mm', 'bill_depth_mm', 'flipper_length_mm', 'body_mass_g', 'sex', 'island'])
+        input_data = pd.DataFrame([[island, bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g, sex]], 
+                                  columns = ['island', 'bill_length_mm', 'bill_depth_mm', 'flipper_length_mm', 'body_mass_g', 'sex'])
 
         # Asegurarse de que las columnas están en el mismo orden que las usadas durante el entrenamiento
         expected_columns = ['bill_length_mm', 'bill_depth_mm', 'flipper_length_mm', 'body_mass_g', 'sex', 'island']
