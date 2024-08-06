@@ -54,26 +54,26 @@ def predict():
         mappings = load_mappings()
 
         # Obtener los parámetros de la solicitud GET
+        island = request.args.get('island', None)
         bill_length_mm = request.args.get('bill_length_mm', None)
         bill_depth_mm = request.args.get('bill_depth_mm', None)
         flipper_length_mm = request.args.get('flipper_length_mm', None)
         body_mass_g = request.args.get('body_mass_g', None)
         sex = request.args.get('sex', None)
-        island = request.args.get('island', None)
-
+        
         # Verificar que todos los parámetros estén presentes
-        if (bill_length_mm is None or bill_depth_mm is None or flipper_length_mm is None or 
-                body_mass_g is None or sex is None or island is None):
+        if (island is None or bill_length_mm is None or bill_depth_mm is None or flipper_length_mm is None or 
+                body_mass_g is None or sex is None):
             return jsonify({'error': 'Args empty, the data are not enough to predict'}), 400
 
         # Convertir los parámetros a sus tipos adecuados
         try:
+            island = int(island)
             bill_length_mm = float(bill_length_mm)
             bill_depth_mm = float(bill_depth_mm)
             flipper_length_mm = float(flipper_length_mm)
             body_mass_g = float(body_mass_g)
-            sex = int(sex)
-            island = int(island)
+            sex = int(sex)            
         except ValueError:
             return jsonify({'error': 'Invalid input types'}), 400
 
@@ -82,7 +82,7 @@ def predict():
                                   columns = ['island', 'bill_length_mm', 'bill_depth_mm', 'flipper_length_mm', 'body_mass_g', 'sex'])
 
         # Asegurarse de que las columnas están en el mismo orden que las usadas durante el entrenamiento
-        expected_columns = ['bill_length_mm', 'bill_depth_mm', 'flipper_length_mm', 'body_mass_g', 'sex', 'island']
+        expected_columns = ['island', 'bill_length_mm', 'bill_depth_mm', 'flipper_length_mm', 'body_mass_g', 'sex']
         input_data = input_data[expected_columns]
 
         # Escalar los datos de entrada
