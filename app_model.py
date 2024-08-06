@@ -81,9 +81,12 @@ def predict():
         input_data = pd.DataFrame([[bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g, sex, island]], 
                                   columns = ['bill_length_mm', 'bill_depth_mm', 'flipper_length_mm', 'body_mass_g', 'sex', 'island'])
 
+        # Asegurarse de que las columnas están en el mismo orden que las usadas durante el entrenamiento
+        expected_columns = ['bill_length_mm', 'bill_depth_mm', 'flipper_length_mm', 'body_mass_g', 'sex', 'island']
+        input_data = input_data[expected_columns]
+
         # Escalar los datos de entrada
-        scaler = load_scaler()
-        input_data_scaled = scaler.transform(input_data)
+        input_data_scaled = load_scaler().transform(input_data)
 
         # Realizar la predicción
         prediction = model.predict(input_data_scaled)
@@ -112,7 +115,7 @@ def retrain():
         
         # Dividir en entrenamiento y prueba
         X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size = 0.2, random_state = 42)
-        model = KNeighborsClassifier(n_neighbors = 5)
+        model = KNeighborsClassifier(n_neighbors=5)
         
         # Entrenar el modelo
         model.fit(X_train, y_train)
@@ -152,8 +155,8 @@ def webhook():
 
             # Realiza un git pull en el repositorio
             try:
-                subprocess.run(['git', 'pull'], check=True)  # Elimina el clone_url
-                subprocess.run(['touch', servidor_web], check=True)
+                subprocess.run(['git', 'pull'], check = True)
+                subprocess.run(['touch', servidor_web], check = True)
                 return jsonify({'message': f'Se realizó un git pull en el repositorio {repo_name}'}), 200
             except subprocess.CalledProcessError:
                 return jsonify({'message': f'Error al realizar git pull en el repositorio {repo_name}'}), 500
