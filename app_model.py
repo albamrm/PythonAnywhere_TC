@@ -24,10 +24,12 @@ def retrain_page():
     return render_template('retrain.html')
 
 # Diccionario para mapear predicciones numéricas a nombres de especies
-species_mapping = {0 : 'Adelie', 1 : 'Gentoo', 2 : 'Chinstrap'}
+species_mapping = {0: 'Adelie', 1: 'Gentoo', 2: 'Chinstrap'}
+island_mapping = {0: 'Torgersen', 1: 'Biscoe', 2: 'Dream'}
+sex_mapping = {0: 'Female', 1: 'Male'}
 
 # Enruta la funcion al endpoint /api/v1/predict
-@app.route('/api/v1/predict', methods = ['GET'])
+@app.route('/api/v1/predict', methods=['GET'])
 def predict():
     try:
         # Cargar el modelo
@@ -64,7 +66,7 @@ def predict():
 
         # Crear un DataFrame con los datos de entrada
         input_data = pd.DataFrame([[bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g, sex, island]], 
-                                  columns = ['bill_length_mm', 'bill_depth_mm', 'flipper_length_mm', 'body_mass_g', 'sex', 'island'])
+                                  columns=['bill_length_mm', 'bill_depth_mm', 'flipper_length_mm', 'body_mass_g', 'sex', 'island'])
         
         # Realizar la predicción
         prediction = model.predict(input_data)[0]
@@ -78,13 +80,13 @@ def predict():
         return jsonify({'error': str(e)}), 500
 
 # Endpoint para reentrenar el modelo
-@app.route('/api/v1/retrain', methods = ['GET'])
+@app.route('/api/v1/retrain', methods=['GET'])
 def retrain():
     if os.path.exists(path_base + '/data/penguins.csv'):
         data = pd.read_csv(path_base + '/data/penguins.csv')
         
         # Separar características y variable objetivo
-        X = data.drop(columns = 'species')
+        X = data.drop(columns='species')
         y = data['species']
         
         # Escalar los datos
@@ -92,7 +94,7 @@ def retrain():
         X_scaled = scaler.fit_transform(X)
         
         # Dividir en entrenamiento y prueba
-        X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size = 0.2, random_state = 42)
+        X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
         model = pickle.load(open(path_base + '/ad_model.pkl', 'rb'))
         
         # Reentrenar el modelo
@@ -105,7 +107,7 @@ def retrain():
     else:
         return '<h2>New data for retrain NOT FOUND. Nothing done!</h2>'
     
-@app.route('/webhook_2024', methods = ['POST'])
+@app.route('/webhook_2024', methods=['POST'])
 def webhook():
     # Ruta al repositorio donde se realizará el pull
     path_repo = '/home/AlbaMRM/sabadosteam'
