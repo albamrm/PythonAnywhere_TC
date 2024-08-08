@@ -6,13 +6,6 @@
     <title>Penguin Prediction API</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <style>
-        .penguin-image {
-            height: 200px; /* Altura fija para todas las imágenes */
-            object-fit: cover; /* Asegura que la imagen rellene el contenedor sin distorsionarse */
-            width: 100%; /* Ancho automático para mantener la proporción */
-        }
-    </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
@@ -50,21 +43,21 @@
         <div class="row">
             <!-- Especie 1 -->
             <div class="col-md-4 text-center">
-                <img src="{{ url_for('static', filename='images/adelie.jpg') }}" alt="Adelie Penguin" class="img-fluid penguin-image">
+                <img src="{{ url_for('static', filename='images/adelie.jpg') }}" alt="Adelie Penguin" class="img-fluid">
                 <h3>Adelie Penguin</h3>
                 <p>Adelie penguins are known for their black and white coloration and are found along the entire Antarctic coast.</p>
                 <p>Los pingüinos Adelie son conocidos por su coloración en blanco y negro y se encuentran en toda la costa antártica.</p>
             </div>
             <!-- Especie 2 -->
             <div class="col-md-4 text-center">
-                <img src="{{ url_for('static', filename='images/gentoo.jpg') }}" alt="Gentoo Penguin" class="img-fluid penguin-image">
+                <img src="{{ url_for('static', filename='images/gentoo.jpg') }}" alt="Gentoo Penguin" class="img-fluid">
                 <h3>Gentoo Penguin</h3>
                 <p>Gentoo penguins have a distinctive white stripe across their head and are the fastest swimming penguins.</p>
                 <p>Los pingüinos Gentoo tienen una distintiva franja blanca en la cabeza y son los pingüinos más rápidos nadando.</p>
             </div>
             <!-- Especie 3 -->
             <div class="col-md-4 text-center">
-                <img src="{{ url_for('static', filename='images/chinstrap.jpg') }}" alt="Chinstrap Penguin" class="img-fluid penguin-image">
+                <img src="{{ url_for('static', filename='images/chinstrap.jpg') }}" alt="Chinstrap Penguin" class="img-fluid">
                 <h3>Chinstrap Penguin</h3>
                 <p>Chinstrap penguins are easily recognized by the narrow black band under their head, which looks like a helmet strap.</p>
                 <p>Los pingüinos Chinstrap son fácilmente reconocibles por la estrecha banda negra bajo su cabeza, que parece una correa de casco.</p>
