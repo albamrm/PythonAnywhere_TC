@@ -39,19 +39,27 @@
                 </select>
             </div>
             <div class="form-group">
-                <label for="bill_length_mm">Bill Length (mm)</label>
+                <label for="bill_length_mm">Bill Length (mm)
+                    <span data-toggle="tooltip" title="Recommended range: 30 - 60 mm" class="text-info ml-1"><i class="fas fa-info-circle"></i></span>
+                </label>
                 <input type="number" class="form-control" id="bill_length_mm" name="bill_length_mm" step="0.1" min="0" required>
             </div>
             <div class="form-group">
-                <label for="bill_depth_mm">Bill Depth (mm)</label>
+                <label for="bill_depth_mm">Bill Depth (mm)
+                    <span data-toggle="tooltip" title="Recommended range: 12 - 22 mm" class="text-info ml-1"><i class="fas fa-info-circle"></i></span>
+                </label>
                 <input type="number" class="form-control" id="bill_depth_mm" name="bill_depth_mm" step="0.1" min="0" required>
             </div>
             <div class="form-group">
-                <label for="flipper_length_mm">Flipper Length (mm)</label>
+                <label for="flipper_length_mm">Flipper Length (mm)
+                    <span data-toggle="tooltip" title="Recommended range: 170 - 232 mm" class="text-info ml-1"><i class="fas fa-info-circle"></i></span>
+                </label>
                 <input type="number" class="form-control" id="flipper_length_mm" name="flipper_length_mm" min="0" required>
             </div>
             <div class="form-group">
-                <label for="body_mass_g">Body Mass (g)</label>
+                <label for="body_mass_g">Body Mass (g)
+                    <span data-toggle="tooltip" title="Recommended range: 2650 - 6350 g" class="text-info ml-1"><i class="fas fa-info-circle"></i></span>
+                </label>
                 <input type="number" class="form-control" id="body_mass_g" name="body_mass_g" min="0" required>
             </div>
             <div class="form-group">
@@ -68,10 +76,19 @@
     <footer class="bg-dark text-white text-center py-3">
         <p>&copy; 2024 Penguin Prediction API. All rights reserved.</p>
     </footer>
+    
+    <!-- JS Libraries -->
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script> <!-- FontAwesome for icons -->
+    
+    <!-- Initialize tooltips -->
     <script>
+    $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+
     document.getElementById('predict-form').addEventListener('submit', function(event) {
         event.preventDefault();
         
