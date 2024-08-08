@@ -130,7 +130,7 @@ def retrain():
 
         return 'Model retrained successfully.'
     else:
-        return '<h2>New data for retrain NOT FOUND. Nothing done!</h2>'
+        return 'New data for retrain NOT FOUND. Nothing done!'
 
 if __name__ == '__main__':
     app.run()
