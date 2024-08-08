@@ -86,13 +86,13 @@ def predict():
         input_data = input_data[expected_columns]
 
         # Escalar los datos de entrada
-        input_data_scaled = load_scaler().transform(input_data)
+        input_data_scaled = scaler.transform(input_data)
 
         # Realizar la predicción
         prediction = model.predict(input_data_scaled)
 
         # Mapear la predicción al nombre de la especie
-        species = load_mappings()['species'][prediction[0]]
+        species = mappings['species'][prediction[0]]
 
         # Retornar la predicción en formato JSON
         return jsonify({'predictions': species})
@@ -115,7 +115,7 @@ def retrain():
         
         # Dividir en entrenamiento y prueba
         X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size = 0.2, random_state = 42)
-        model = KNeighborsClassifier(n_neighbors=5)
+        model = KNeighborsClassifier(n_neighbors = 5)
         
         # Entrenar el modelo
         model.fit(X_train, y_train)
@@ -131,39 +131,6 @@ def retrain():
         return 'Model retrained successfully.'
     else:
         return '<h2>New data for retrain NOT FOUND. Nothing done!</h2>'
-    
-@app.route('/webhook_2024', methods = ['POST'])
-def webhook():
-    # Ruta al repositorio donde se realizará el pull
-    path_repo = '/home/AlbaMRM/sabadosteam'
-    servidor_web = '/var/www/albamrm_pythonanywhere_com_wsgi.py'
-
-    # Comprueba si la solicitud POST contiene datos JSON
-    if request.is_json:
-        payload = request.json
-        # Verifica si la carga útil (payload) contiene información sobre el repositorio
-        if 'repository' in payload:
-            # Extrae el nombre del repositorio y la URL de clonación
-            repo_name = payload['repository']['name']
-            clone_url = payload['repository']['clone_url']
-            
-            # Cambia al directorio del repositorio
-            try:
-                os.chdir(path_repo)
-            except FileNotFoundError:
-                return jsonify({'message': 'El directorio del repositorio no existe'}), 404
-
-            # Realiza un git pull en el repositorio
-            try:
-                subprocess.run(['git', 'pull'], check = True)
-                subprocess.run(['touch', servidor_web], check = True)
-                return jsonify({'message': f'Se realizó un git pull en el repositorio {repo_name}'}), 200
-            except subprocess.CalledProcessError:
-                return jsonify({'message': f'Error al realizar git pull en el repositorio {repo_name}'}), 500
-        else:
-            return jsonify({'message': 'No se encontró información sobre el repositorio en la carga útil (payload)'}), 400
-    else:
-        return jsonify({'message': 'La solicitud no contiene datos JSON'}), 400
 
 if __name__ == '__main__':
     app.run()
